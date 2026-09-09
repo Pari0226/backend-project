@@ -1,9 +1,11 @@
-import http from 'http'
+import express from 'express'
+import APP_CONFIG from './utils/config.utils.js'
+import connectDB from './db/connection.js';
+const app = express()
 
-const server = http.createServer((req,res)=>{
-    res.write('Hello, this is a response from your Node.js server!');
-    res.end()
-})
-server.listen(3000,()=>{
-    console.log("server is running sasas bhsabhsha")
+
+connectDB();
+
+app.listen(APP_CONFIG.PORT ,()=>{
+    console.log(`server is running at http:localhost:${APP_CONFIG.PORT}`)
 })
