@@ -1,9 +1,17 @@
-import http from 'http'
+import express from 'express';
+import env from 'dotenv'
+env.config()
 
-const server = http.createServer((req,res)=>{
-    res.write('Hello, this is a response from your Node.js server!');
-    res.end()
+const app = express()
+
+app.get('/',(req,res)=>{
+    res.send("<h1>hey bhai</h1>")
 })
-server.listen(3000,()=>{
-    console.log("server is running sasas bhsabhsha")
+
+app.listen(process.env.PORT,()=>{
+    console.log(`server is running at http://localhost:${process.env.PORT} `)
 })
+
+
+
+
