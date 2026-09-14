@@ -42,6 +42,28 @@ blogroute.post('/store',async(req,res)=>{
 
 })
 
+blogroute.delete('/:id',async(req,res)=>{
+     try{   
+        const blogId = req.params.id
+        // check  blog exist or not 
+        let blogExist = await Blog.findByIdAndDelete(blogId)
+        if(!blogExist) return res.status(404).json({"status":false,message:" blog not found"})
+        
+          return res.status(203).json({
+            "status":true,
+            "message":"blog delete successfully!",
+        })
+     }catch(err){
+        console.log(err)
+        return res.status(500).json({
+            "status":false,
+            "message":"something went wrong",
+        })
+     }
+    
+  
+})
+
 
 
 export default blogroute
