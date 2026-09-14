@@ -3,26 +3,13 @@ import Blog from '../models/blogs.model.js'
 
 const blogroute = express.Router()
 
-blogroute.get('/',(req,res)=>{
+blogroute.get('/',async(req,res)=>{
+    // fetch blogs from databases
+    let blogs= await Blog.find().sort({createdAt:-1});
     return res.status(200).json({
         "status":true,
         "message":"blogs fetch successfully!",
-        "data":[
-            {
-                "id":1,
-                "title":"why pari is heroine?",
-                "description":"tetstst",
-                "author":"bhavesh",
-                "created_at":"08 aug 2025"
-            },
-            {
-                 "id":2,
-                "title":"why bhavesh is so handsome?",
-                "description":"testing",
-                "author":"pari",
-                "created_at":"10 aug 2025"
-            }
-        ]
+        "data":blogs
     })
 })
 
