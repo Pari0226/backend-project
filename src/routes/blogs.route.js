@@ -47,7 +47,7 @@ blogroute.delete('/:id',async(req,res)=>{
         const blogId = req.params.id
         // check  blog exist or not 
         let blogExist = await Blog.findByIdAndDelete(blogId)
-        if(!blogExist) return res.status(404).json({"status":false,message:" blog not found"})
+        if(!blogExist) return res.status(404).json({"status":false,message:"blog not found"})
         
           return res.status(203).json({
             "status":true,
@@ -64,6 +64,31 @@ blogroute.delete('/:id',async(req,res)=>{
   
 })
 
+blogroute.put('/:id',async(req,res)=>{
+    try{
+         let blogId  = req.params.id;
+    const {title, author,body} = req.body
+       
+    // check blogs exist or not
+        let blog = await Blog.findByIdAndUpdate(blogId,req.body,{new:true,runValidators:true})
+        if(!blog) return res.status(404).json({"status":false,message:"blog not found"})
+        return res.status(200).json({
+            "status":true,
+            "message":"blog updated successfully!",
+            "data":blog
+        })
+
+
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({
+            "status":false,
+            "message":"something went wrong",
+            "error":err?.message
+        })
+     }
+   
+})
 
 
 export default blogroute
