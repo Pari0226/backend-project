@@ -1,7 +1,24 @@
 import express  from 'express'
 import Blog from '../models/blogs.model.js'
-
+import upload from '../middleware/uploads.middleware.js'
 const blogroute = express.Router()
+
+// multer throws its errors inside the upload middleware itself, before the
+// route handler's try/catch ever runs, so without this wrapper a bad upload
+// (wrong field name, unsupported type, file too large, etc.) crashes past
+// Express's default error handler as a raw HTML stack trace instead of JSON
+// const handleCoverImageUpload = (req, res, next) => {
+//     upload.single('coverImage')(req, res, (err) => {
+//         if (err) {
+//             return res.status(400).json({
+//                 "status": false,
+//                 "message": "cover image upload failed",
+//                 "error": err.message
+//             })
+//         }
+//         next()
+//     })
+// }
 
 blogroute.get('/',async(req,res)=>{
     // fetch blogs from databases
@@ -13,16 +30,21 @@ blogroute.get('/',async(req,res)=>{
     })
 })
 
-blogroute.post('/store',async(req,res)=>{
+blogroute.post('/store',upload.single('coverImage'),async(req,res)=>{
     try{
     //  req.body contains the request body means if you are sending somethin in payload
         const {title, author,body} = req.body
+
+        // check if file is coming from the server or not
+        let coverImage = req.file ? req.file.filename : null;
+
         let blog = await Blog.create({
             title,
             author,
-            body
+            body,
+            coverImage
         })
-        
+
         return res.status(201).json({
             "status":true,
             "message":"blog created successfully!",
@@ -33,6 +55,7 @@ blogroute.post('/store',async(req,res)=>{
         return res.status(500).json({
             "status":false,
             "message":"something went wrong",
+            "error":err.message
         })
 
     }
