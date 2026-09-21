@@ -1,5 +1,4 @@
 import express  from 'express'
-import Blog from '../models/blogs.model.js'
 import upload from '../middleware/uploads.middleware.js'
 import { destroy, get, store, update } from '../controllers/blog.controller.js';
 const blogroute = express.Router()
