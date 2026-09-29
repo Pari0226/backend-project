@@ -21,10 +21,12 @@ export async function store(req,res){
 
         // check if file is coming from the server or not
         let coverImage = req.file ? req.file.filename : null;
+        let slug = title.toLowerCase().trim().replaceAll(' ','-')
 
         let blog = await Blog.create({
             title,
             author,
+            slug,
             body,
             coverImage
         })
@@ -92,4 +94,25 @@ export async function update(req,res){
         })
      }
    
+}
+
+export async function detail(req,res){
+     try{   
+        const slug = req.params.slug
+        // check  blog exist or not 
+        let blogExist = await Blog.findOne({slug:slug})
+        if(!blogExist) return res.status(404).json({"status":false,message:"blog not found"})
+        
+            return res.status(203).json({
+            "status":true,
+            "message":"blog found successfully!",
+            "data":blogExist
+        })
+        }catch(err){
+        console.log(err)
+        return res.status(500).json({
+            "status":false,
+            "message":"something went wrong",
+        })
+    }
 }

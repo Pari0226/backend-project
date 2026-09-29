@@ -1,6 +1,6 @@
 import express  from 'express'
 import upload from '../middleware/uploads.middleware.js'
-import { destroy, get, store, update } from '../controllers/blog.controller.js';
+import { destroy, get, store, update,detail } from '../controllers/blog.controller.js';
 const blogroute = express.Router()
 
 
@@ -13,6 +13,8 @@ blogroute.post('/store',upload.single('coverImage'),store)
 // delete blog
 blogroute.delete('/:id',destroy)
 
+// get blog detail
+blogroute.get('/:slug',detail)
 
 // update blog
 blogroute.put('/:id',update)
