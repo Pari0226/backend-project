@@ -18,7 +18,7 @@
   </head>
   <body>
     <div class="container mt-5">
-        <form id="blogForm">
+        <form id="blogForm" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="blog-title">Blog title</label>
                         <input type="text" class="form-control" id="blog-title" placeholder="Enter blog title">
@@ -27,21 +27,29 @@
                     <div class="form-group">
                         <label for="slug">Blog Slug</label>
                         <input type="text" class="form-control" id="slug" placeholder="Enter slug">
-                                                <div id="slug-error" class="error"></div>
-
+                        <div id="slug-error" class="error"></div>
                     </div>
+                    <div class="form-group">
+                        <label for="slug">Blog Image</label>
+                        <input type="file" class="form-control" id="image" accept="image/*">
+                        <div id="slug-error" class="error"></div>
+                    </div>
+
                     <div class="form-group">
                         <label for="author">Author</label>
                         <input type="text" class="form-control" id="author" placeholder="Enter Author ">
                         <div id="author-error" class="error"></div>
                     </div>
-                    <textarea id="description">
+                    <textarea id="description" name="description" >
             </textarea>
 
 
          
+        <div class="alert alert-danger error m-2 " id="error-message" style="display: none;">
+
+        </div>
+        <button type="submit" class="btn btn-primary mt-5" >Submit</button>
        
-        <button type="submit" class="btn btn-primary">Submit</button>
         </form>
 </div>
      <script src="https://cdn.tiny.cloud/1/src75j1a560alr91je61jc0voz3dkohxktysr03ib929rtfy/tinymce/8/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
@@ -54,6 +62,7 @@
   });
 
  let blogtitle = document.getElementById('blog-title')
+ let baseUrl  ='http://localhost:9000/api/blogs'
   blogtitle.addEventListener('keyup',(e)=>{
     let slug  = e.target.value;
     if (blogtitle.value.trim() ==''){
@@ -66,34 +75,74 @@
 
   })
   let blogform = document.getElementById('blogForm');
-  blogform.addEventListener('submit',(e)=>{
+  blogform.addEventListener('submit',async(e)=>{
+    let validation=false
     e.preventDefault()
     let title =blogtitle.value.trim();
+    let  image = document.getElementById('image').value;
+    console.log("image",image)
     let slug = document.getElementById('slug').value.trim();
     let author = document.getElementById('author').value.trim();
-    let description = document.getElementById('description');
+    let description = tinymce.get('description').getContent().trim(); // TinyMCE doesn't sync the textarea until saved, so read from the editor
     let error=document.getElementsByClassName('error');
     Array.from(error).forEach(element => {
-        document.getElementById(element.getAttribute('id')).innerText=''
+        // this for removing the general error messagae
+        document.getElementById(element.getAttribute('id')).innerText=''   
 
-        
+        // end
+
+        // this is for hiding the alert box
+        let errorMessage =  document.getElementById('error-message')
+        errorMessage.style.display="none"    
+
+        // end 
     });
-    
+    return 
 
 
     if( title==''){
         let blogerror = document.getElementById('blog-title-error');
         blogerror.innerHTML="blog title is required!"
+        validation=true
     }
     if( slug==''){
         let slugerror = document.getElementById('slug-error');
         slugerror.innerHTML="blog slug is required!"
+        validation= true
     }
      if( author==''){
         let autherros = document.getElementById('author-error');
         autherros.innerHTML="author is required!"
+        validation=true
     }
-     
+
+    if(validation){
+        return  // this is for preventing rest of the code to execute 
+    }
+    let payload = JSON.stringify({
+            author,
+            title,
+            slug,
+            body:description // because here body is the params accepted by backend server , if we use description so server will not able to identify it because it requires body as params
+        })
+    //  store the blog here
+   let response =  await fetch(baseUrl+'/store',{
+        'method':"POST",
+        'headers':{"content-type":'application/json'},
+        'body':payload // fetch expects the request body under `body`, not `payload`
+    })
+    if(!response.ok){
+        let data  = await response.json();
+        let errorMessage =  document.getElementById('error-message')
+        errorMessage.style.display="block"
+        errorMessage.innerText=data?.error || data?.message
+        return 
+    }
+    if(response.status == 201){
+        let data  = await response.json();
+        alert(data.message)
+        window.location.href='/blog-frontend/'
+    }
 
 
   })

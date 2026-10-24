@@ -17,12 +17,10 @@ export  async function get(req,res){
 export async function store(req,res){
     try{
     //  req.body contains the request body means if you are sending somethin in payload
-        const {title, author,body} = req.body
+        const {title, author,body,slug} = req.body
 
         // check if file is coming from the server or not
         let coverImage = req.file ? req.file.filename : null;
-        let slug = title.toLowerCase().trim().replaceAll(' ','-')
-
         let blog = await Blog.create({
             title,
             author,
