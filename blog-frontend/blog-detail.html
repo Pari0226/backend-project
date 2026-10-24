@@ -452,9 +452,10 @@
     <!-- FEATURED IMAGE -->
 
     <img
-        src="https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1400&q=80"
+        src=""
         alt="Artificial Intelligence"
         class="featured-image"
+        id="featured-image"
     >
 
 
@@ -480,6 +481,8 @@
             window.location.href = '/index.html';
        }else{
         document.getElementById('title').innerText =result.title
+        let image = result?.coverImage ? 'http://localhost:9000/public/temp/'+result.coverImage:'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1400&q=80' 
+        document.getElementById('featured-image').setAttribute('src',image)
         document.getElementById('blog-description').innerText=result.body
         document.getElementById('author').innerText=result.author
         document.getElementById('blog-date').innerHTML=result.createdAt

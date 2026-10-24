@@ -79,12 +79,12 @@
     let validation=false
     e.preventDefault()
     let title =blogtitle.value.trim();
-    let  image = document.getElementById('image').value;
-    console.log("image",image)
+    let image = document.getElementById('image').files[0];    //  you have use .files[0] instead of . value while dealing with image
     let slug = document.getElementById('slug').value.trim();
     let author = document.getElementById('author').value.trim();
     let description = tinymce.get('description').getContent().trim(); // TinyMCE doesn't sync the textarea until saved, so read from the editor
     let error=document.getElementsByClassName('error');
+    
     Array.from(error).forEach(element => {
         // this for removing the general error messagae
         document.getElementById(element.getAttribute('id')).innerText=''   
@@ -97,7 +97,6 @@
 
         // end 
     });
-    return 
 
 
     if( title==''){
@@ -119,17 +118,23 @@
     if(validation){
         return  // this is for preventing rest of the code to execute 
     }
-    let payload = JSON.stringify({
-            author,
-            title,
-            slug,
-            body:description // because here body is the params accepted by backend server , if we use description so server will not able to identify it because it requires body as params
-        })
+    let formData =new FormData()
+    if(image) formData.append('coverImage',image)
+    formData.append('title',title)
+    formData.append('slug',slug)
+    formData.append('author',author)
+    formData.append('body',description)
+
+    // let payload = JSON.stringify({
+    //         author,
+    //         title,
+    //         slug,
+    //         body:description // because here body is the params accepted by backend server , if we use description so server will not able to identify it because it requires body as params
+    //     })
     //  store the blog here
    let response =  await fetch(baseUrl+'/store',{
         'method':"POST",
-        'headers':{"content-type":'application/json'},
-        'body':payload // fetch expects the request body under `body`, not `payload`
+        'body':formData // fetch expects the request body under `body`, not `payload`   // comment 2 : note for pari you have send formdata while dealing with image
     })
     if(!response.ok){
         let data  = await response.json();
