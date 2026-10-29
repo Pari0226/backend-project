@@ -17,7 +17,7 @@ blogroute.delete('/:id',destroy)
 blogroute.get('/:slug',detail)
 
 // update blog
-blogroute.put('/:id',update)
+blogroute.put('/:id',upload.single('coverImage'),update)
 
 
 export default blogroute

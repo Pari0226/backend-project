@@ -19,30 +19,30 @@
   <body>
     <div class="container mt-5">
         <form id="blogForm" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label for="blog-title">Blog title</label>
-                        <input type="text" class="form-control" id="blog-title" placeholder="Enter blog title">
-                        <div id="blog-title-error" class="error"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="slug">Blog Slug</label>
-                        <input type="text" class="form-control" id="slug" placeholder="Enter slug">
-                        <div id="slug-error" class="error"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="slug">Blog Image</label>
-                        <input type="file" class="form-control" id="image" accept="image/*">
-                        <div id="slug-error" class="error"></div>
-                        <div id="uploaded-image" style="height: 100px; width: 100px;">
+            <div class="form-group">
+                <label for="blog-title">Blog title</label>
+                <input type="text" class="form-control" id="blog-title" placeholder="Enter blog title">
+                <div id="blog-title-error" class="error"></div>
+            </div>
+            <div class="form-group">
+                <label for="slug">Blog Slug</label>
+                <input type="text" class="form-control" id="slug" placeholder="Enter slug">
+                <div id="slug-error" class="error"></div>
+            </div>
+            <div class="form-group">
+                <label for="slug">Blog Image</label>
+                <input type="file" class="form-control" id="image" accept="image/*">
+                <div id="slug-error" class="error"></div>
+                <div id="uploaded-image" style="height: 100px; width: 100px;">
 
-                        </div>
-                    </div>
+                </div>
+            </div>
 
-                    <div class="form-group mt-3">
-                        <label for="author">Author</label>
-                        <input type="text" class="form-control" id="author" placeholder="Enter Author ">
-                        <div id="author-error" class="error"></div>
-                    </div>
+            <div class="form-group mt-3">
+                <label for="author">Author</label>
+                <input type="text" class="form-control" id="author" placeholder="Enter Author ">
+                <div id="author-error" class="error"></div>
+            </div>
                     <textarea id="description" name="description" >
             </textarea>
 
@@ -51,7 +51,7 @@
         <div class="alert alert-danger error m-2 " id="error-message" style="display: none;">
 
         </div>
-        <button type="submit" class="btn btn-primary mt-5" >Submit</button>
+        <button type="submit" class="btn btn-primary mt-5" id="submit-button" >Submit</button>
        
         </form>
 </div>
@@ -127,12 +127,12 @@
 //     formData.append('author',author)
 //     formData.append('body',description)
 
-//     // let payload = JSON.stringify({
-//     //         author,
-//     //         title,
-//     //         slug,
-//     //         body:description // because here body is the params accepted by backend server , if we use description so server will not able to identify it because it requires body as params
-//     //     })
+    // let payload = JSON.stringify({
+    //         author,
+    //         title,
+    //         slug,
+    //         body:description // because here body is the params accepted by backend server , if we use description so server will not able to identify it because it requires body as params
+    //     })
 //     //  store the blog here
 //    let response =  await fetch(baseUrl+'/store',{
 //         'method':"POST",
@@ -159,6 +159,7 @@
 //  get the blogs data first
 const params = new URLSearchParams(window.location.search);
     const slug = params.get("slug");
+    let Blogid= ""
     async function getBlogDetail(slug){
        let blogDetail =  await fetch(`http://localhost:9000/api/blogs/${slug}`)
        let data  = await blogDetail.json();
@@ -168,6 +169,7 @@ const params = new URLSearchParams(window.location.search);
        }else{
         document.getElementById('blog-title').value =result.title
         document.getElementById('slug').value =result.slug
+        Blogid = result._id
 
         let image = result?.coverImage ? 'http://localhost:9000/public/temp/'+result.coverImage:'' 
         let imgdiv=    document.getElementById('uploaded-image')
@@ -178,8 +180,7 @@ const params = new URLSearchParams(window.location.search);
         img.style.marginTop="10px"
         let anchorTag = document.createElement('a');
         anchorTag.setAttribute('href',image)
-                anchorTag.setAttribute('target','__blank');
-
+        anchorTag.setAttribute('target','__blank');
         imgdiv.append(img)
         anchorTag.append(img)
         imgdiv.append(anchorTag)
@@ -191,8 +192,92 @@ const params = new URLSearchParams(window.location.search);
 
        console.log(result)
 
-
     }
+
+
+    // ####################################################### UPDATE FORM 
+
+        //  update form 
+        let blogform  = document.getElementById('blogForm');
+        blogform.addEventListener('submit',async(e)=>{
+            e.preventDefault()
+            document.getElementById('submit-button').innerText="Processing.....";
+            let title =blogtitle.value.trim();
+            let image = document.getElementById('image').files[0];    //  you have use .files[0] instead of . value while dealing with image
+            let slug = document.getElementById('slug').value.trim();
+            let validation=false
+
+            let author = document.getElementById('author').value.trim();
+            let description = tinymce.get('description').getContent().trim(); // TinyMCE doesn't sync the textarea until saved, so read from the editor
+            let error=document.getElementsByClassName('error');
+            
+            Array.from(error).forEach(element => {
+                // this for removing the general error messagae
+                document.getElementById(element.getAttribute('id')).innerText=''   
+
+                // end
+
+                // this is for hiding the alert box
+                let errorMessage =  document.getElementById('error-message')
+                errorMessage.style.display="none"    
+
+                // end 
+            });
+
+
+            if( title==''){
+                let blogerror = document.getElementById('blog-title-error');
+                blogerror.innerHTML="blog title is required!"
+                validation=true
+            }
+            if( slug==''){
+                let slugerror = document.getElementById('slug-error');
+                slugerror.innerHTML="blog slug is required!"
+                validation= true
+            }
+            if( author==''){
+                let autherros = document.getElementById('author-error');
+                autherros.innerHTML="author is required!"
+                validation=true
+            }
+
+            if(validation){
+                document.getElementById('submit-button').innerText="Submit";
+
+                return  // this is for preventing rest of the code to execute 
+            }
+
+            let formData = new FormData();
+            if(image) formData.append('coverImage',image)
+            formData.append('title',title)
+            formData.append('slug',slug)
+            formData.append('author',author)
+            formData.append('body',description)
+
+            //  update api
+
+            let response = await fetch(`http://localhost:9000/api/blogs/${Blogid}`,{
+                'method':"PUT",
+                'body':formData
+            })
+            if(!response.ok){
+                let data  = await response.json();
+                let errorMessage =  document.getElementById('error-message')
+                errorMessage.style.display="block"
+                errorMessage.innerText=data?.error || data?.message
+                document.getElementById('submit-button').innerText="Submit";
+
+                return 
+            }
+            if(response.status == 200){
+                let data  = await response.json();
+                alert(data.message)
+                window.location.href=`/blog-frontend/update-blog.html?slug=${slug}`
+            }
+               
+        
+
+        })
 
 </script>
     <!-- Optional JavaScript -->

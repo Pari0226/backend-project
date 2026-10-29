@@ -71,10 +71,20 @@ export async function destroy(req,res){
 export async function update(req,res){
     try{
          let blogId  = req.params.id;
-    const {title, author,body} = req.body
+        const {title, author,body,slug} = req.body
+        let payload = {
+            title,
+            author,
+            body,
+            slug
+        }
        
-    // check blogs exist or not
-        let blog = await Blog.findByIdAndUpdate(blogId,req.body,{new:true,runValidators:true})
+        // check blogs exist or not
+        if(req.file){
+            payload.coverImage =req.file.filename
+        }
+           
+        let blog = await Blog.findByIdAndUpdate(blogId, payload,{new:true,runValidators:true})
         if(!blog) return res.status(404).json({"status":false,message:"blog not found"})
         return res.status(200).json({
             "status":true,
