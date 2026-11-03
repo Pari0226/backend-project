@@ -3,6 +3,7 @@ import env from 'dotenv'
 import ConnectDB from './connection/db.js';
 import blogroute from './routes/blogs.route.js';
 import cors from 'cors';
+import userRoute from './routes/user.route.js';
 env.config()
 
 
@@ -21,6 +22,9 @@ app.use('/public', express.static('public'))
 
 
 app.use('/api/blogs',blogroute)
+app.use('/api/user',userRoute)
+
+// 
 
 
 
