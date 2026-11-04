@@ -1,5 +1,11 @@
 import User from "../models/user.model.js";
 import registerValidator from "../validations/signup.validation.js";
+import bcrypt from 'bcrypt';
+import { createJwtToken } from "../utilities/jwt.utility.js";
+
+
+
+
 export async function signUp(req,res){
     try{
         // step 1 validation for the required feilds
@@ -19,7 +25,8 @@ export async function signUp(req,res){
     
         // step 3  email unique validation
         let emailExist = await User.find({email});
-        if(emailExist){
+        console.log(emailExist)
+        if(emailExist.length >0){
             return res.status(409).json({
                 "status":false,
                 "message":'Email already exist'
@@ -27,14 +34,37 @@ export async function signUp(req,res){
         }
 
         // step 4. password bcrypt "hash"
+        let hashPassword = await bcrypt.hash(password,10);
 
-        // step 5 create jwt token 
+        // step 5 create user
+        let user= await User.create({
+            name,
+            email,
+            password:hashPassword
+        })
+        if(user){
+            // step 6 create jwt token 
+            let payload = {
+                id:user._id,
+                name:user.name
+            }
+            
+            let token = await createJwtToken(payload)
+            return res.status(201).json({
+                'status':true,
+                'message':'user created successfully!',
+                'accessToken':token
+            })
+        }else{
+            throw Error("Error while creating user")
+        }
+        
 
 
-        // step 6 send response with token
+        // step 7 send response with token
 
     }catch(err){
-        console.log(validate,'validate bhavesh')
+        console.log(err,"error")
 
 
     }
