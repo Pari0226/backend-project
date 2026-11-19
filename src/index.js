@@ -4,6 +4,7 @@ import ConnectDB from './connection/db.js';
 import blogroute from './routes/blogs.route.js';
 import cors from 'cors';
 import userRoute from './routes/user.route.js';
+import cookieParser from 'cookie-parser';
 env.config()
 
 
@@ -15,6 +16,7 @@ const corsOptions = {
 const app = express()
 
 app.use(express.json({ limit: '50mb' }))
+app.use(cookieParser())
 app.use(cors(corsOptions))
 
 // serve uploaded images at http://localhost:PORT/public/temp/<filename>

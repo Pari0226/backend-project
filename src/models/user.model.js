@@ -13,6 +13,15 @@ const UserSchema =  new mongoose.Schema({
         type:String,
         required:true,
         select:false
+    },
+    refreshToken:{
+        type:String,
+        required:false,
+        select:false
+    },
+    refreshTokenExpiresAt:{
+     type:String,
+     required:false
     }
 })
 

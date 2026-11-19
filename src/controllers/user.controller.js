@@ -1,7 +1,8 @@
 import User from "../models/user.model.js";
 import registerValidator from "../validations/signup.validation.js";
 import bcrypt from 'bcrypt';
-import { createJwtToken } from "../utilities/jwt.utility.js";
+import { createJwtToken, createRefreshtoken } from "../utilities/jwt.utility.js";
+import { COOKIES_OPTION } from "../utilities/cookies.utility.js";
 
 
 
@@ -25,7 +26,6 @@ export async function signUp(req,res){
     
         // step 3  email unique validation
         let emailExist = await User.find({email});
-        console.log(emailExist)
         if(emailExist.length >0){
             return res.status(409).json({
                 "status":false,
@@ -50,17 +50,60 @@ export async function signUp(req,res){
             }
             
             let token = await createJwtToken(payload)
+
+            //  generate refreshtoken 
+            let refreshToken = await createRefreshtoken(payload);
+
+            let futureDate = new Date();
+            futureDate.setDate(futureDate.getDate() + 30);
+            let expiresAt = futureDate.toISOString();
+            
+
+            user.refreshToken = refreshToken;
+            user.refreshTokenExpiresAt = expiresAt;
+            await user.save();
+
+            // save cookies
+            COOKIES_OPTION.expiresAt =expiresAt;
+            res.cookie('refreshToken',refreshToken,COOKIES_OPTION);
+            // console.log(expiresAt.toLocaleString());
+            // console.log(refreshToken);
             return res.status(201).json({
                 'status':true,
                 'message':'user created successfully!',
-                'accessToken':token
+                'accessToken':token,
             })
+
+
+        // TODO
+
+        /*
+         ACCESS TOKEN KI EXPIRY SET [15 MIN]
+         REFRESH TOKEN KI EXPIRETY SET[30 DAYS]
+         REFRESH TOKEN SHOULD BE SAVE ON COOKIES OM SERVER
+        GENERATE ACCESSTOKEN FROM REFRESH TOKEN WHEN ACCESS TOKEN GOT EXPIRES
+        COOKIES METHOS [ LIKE HTTPYONLY, SAMESITE ,PATH , MAXAGE]
+
+
+        */
+        
+        // TODO END 
+
+        //  DONE 
+            /*
+             ZOD VALIDATION 
+             TOKEN CREATION 
+
+
+            */
+
+
+        // DONE END 
         }else{
             throw Error("Error while creating user")
         }
         
-
-
+        
         // step 7 send response with token
 
     }catch(err){
