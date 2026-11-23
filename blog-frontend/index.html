@@ -107,54 +107,68 @@
     let blogsHtmlElement = document.getElementsByClassName('blogs');
     window.addEventListener('load',async(e)=>{
 
-        // fetch blogs 
-        let blogs =  await fetch('http://localhost:9000/api/blogs')
-        let  result = await blogs.json()
-        let blogHTML = '';
-        result.data.forEach(blog => {
-            let date = new Date(blog.createdAt)
-            let image = blog.coverImage ? 'http://localhost:9000/public/temp/'+blog.coverImage : 'https://images.unsplash.com/photo-1499750310107-5fef28a66643';
-             blogHTML += `
-             <div class="blog-card">
-            <img 
-                src="${image}"
-                alt="Node.js"
-            >
+        try{
+            let accessToken = localStorage.getItem('accessToken');
 
-            <div class="blog-content">
+             // fetch blogs 
+            let blogs =  await fetch('http://localhost:9000/api/blogs',{
+                method:"GET",
+                headers:{
+                    "Authorization" : `Bearer ${accessToken}`,
+                    "Content-Type": 'application/json'
+                }
+            })
+            let  result = await blogs.json()
+            let blogHTML = '';
+            result.data.forEach(blog => {
+                let date = new Date(blog.createdAt)
+                let image = blog.coverImage ? 'http://localhost:9000/public/temp/'+blog.coverImage : 'https://images.unsplash.com/photo-1499750310107-5fef28a66643';
+                blogHTML += `
+                <div class="blog-card">
+                <img 
+                    src="${image}"
+                    alt="Node.js"
+                >
 
-                <h2 class="blog-title">
-                ${blog.title}
-                </h2>
+                <div class="blog-content">
 
-                <div class="author">
-                    By ${blog.author} · ${date.toLocaleString('en-In',{
-                        day:"numeric",
-                        month:"long",
-                        year:"numeric"
-                    })}
+                    <h2 class="blog-title">
+                    ${blog.title}
+                    </h2>
+
+                    <div class="author">
+                        By ${blog.author} · ${date.toLocaleString('en-In',{
+                            day:"numeric",
+                            month:"long",
+                            year:"numeric"
+                        })}
+                    </div>
+
+                    <p class="description">
+                    ${blog.body.length >=50 ?  blog.body.substr(0,50)+'....' : blog.body}
+                    </p>
+
+                    <a href="blog-detail.html?slug=${blog.slug}" class="read-more">
+                        Read More
+                    </a>
+                    <a href="update-blog.html?slug=${blog.slug}" class="read-more">
+                        Update
+                    </a>
+
+
                 </div>
 
-                <p class="description">
-                   ${blog.body.length >=50 ?  blog.body.substr(0,50)+'....' : blog.body}
-                </p>
-
-                <a href="blog-detail.html?slug=${blog.slug}" class="read-more">
-                    Read More
-                </a>
-                 <a href="update-blog.html?slug=${blog.slug}" class="read-more">
-                    Update
-                </a>
-
-
             </div>
-
-        </div>
-            `;
-            
-        });
+                `;
+                
+            });
 
         blogsHtmlElement[0].innerHTML = blogHTML
+        }catch(err){
+            console.log("err",err)
+        }
+
+       
 
 
 
